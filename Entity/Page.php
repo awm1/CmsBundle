@@ -1,119 +1,180 @@
 <?php
 
-declare(strict_types=1);
-
 /*
- * This file is part of the OrbitaleCmsBundle package.
- *
- * (c) Alexandre Rock Ancelet <alex@orbitale.io>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+* This file is part of the OrbitaleCmsBundle package.
+*
+* (c) Alexandre Rock Ancelet <alex@orbitale.io>
+*
+* For the full copyright and license information, please view the LICENSE
+* file that was distributed with this source code.
+*/
 
 namespace Orbitale\Bundle\CmsBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\Event\PreRemoveEventArgs;
+use Doctrine\ORM\Event\LifecycleEventArgs;
+use Doctrine\ORM\Mapping as ORM;
+use Orbitale\Bundle\CmsBundle\Repository\PageRepository;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\String\Slugger\AsciiSlugger;
+use Symfony\Component\Validator\Constraints as Assert;
 
+#[UniqueEntity('slug')]
+#[ORM\HasLifecycleCallbacks]
+#[ORM\MappedSuperclass(repositoryClass: PageRepository::class)]
 abstract class Page
 {
     /**
-     * @var string
+     * @return int|string
      */
+    abstract public function getId();
+
+    /**
+     * @var string
+     *
+     *
+     */
+    #[ORM\Column(name: 'title', type: 'string', length: 255)]
+    #[Assert\Type('string')]
+    #[Assert\NotBlank]
     protected $title;
 
     /**
      * @var string
+     *
+     *
      */
+    #[ORM\Column(name: 'slug', type: 'string', length: 255, unique: true)]
+    #[Assert\Type('string')]
+    #[Assert\NotBlank]
     protected $slug;
 
     /**
      * @var string
+     *
+     *
      */
+    #[ORM\Column(name: 'page_content', type: 'text', nullable: true)]
+    #[Assert\Type('string')]
     protected $content;
 
     /**
      * @var string
+     *
+     *
      */
+    #[ORM\Column(name: 'meta_description', type: 'string', length: 255, nullable: true)]
+    #[Assert\Type('string')]
     protected $metaDescription;
 
     /**
      * @var string
+     *
+     *
      */
+    #[ORM\Column(name: 'meta_title', type: 'string', length: 255, nullable: true)]
+    #[Assert\Type('string')]
     protected $metaTitle;
 
     /**
      * @var string
+     *
+     *
      */
+    #[ORM\Column(name: 'meta_keywords', type: 'string', length: 255, nullable: true)]
+    #[Assert\Type('string')]
     protected $metaKeywords;
 
     /**
      * @var null|Category
      */
+    #[Assert\Type(Category::class)]
     protected $category;
 
     /**
      * @var string
+     *
+     *
      */
+    #[ORM\Column(name: 'css', type: 'text', nullable: true)]
+    #[Assert\Type('string')]
     protected $css;
 
     /**
      * @var string
+     *
+     *
      */
+    #[ORM\Column(name: 'js', type: 'text', nullable: true)]
+    #[Assert\Type('string')]
     protected $js;
 
     /**
      * @var \DateTimeImmutable
+     *
+     *
      */
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
+    #[Assert\Type(\DateTimeImmutable::class)]
     protected $createdAt;
 
     /**
      * @var bool
+     *
+     *
      */
+    #[ORM\Column(name: 'enabled', type: 'boolean')]
+    #[Assert\Type('bool')]
     protected $enabled = false;
 
     /**
      * @var bool
+     *
+     *
      */
+    #[ORM\Column(name: 'homepage', type: 'boolean')]
+    #[Assert\Type('bool')]
     protected $homepage = false;
 
     /**
      * @var string
+     *
+     *
      */
+    #[ORM\Column(name: 'host', type: 'string', length: 255, nullable: true)]
+    #[Assert\Type('string')]
     protected $host;
 
     /**
      * @var string
+     *
+     *
      */
+    #[ORM\Column(name: 'locale', type: 'string', length: 6, nullable: true)]
+    #[Assert\Type('string')]
     protected $locale;
 
     /**
      * @var null|Page
      */
+    #[Assert\Type(Page::class)]
     protected $parent;
 
     /**
-     * @var ArrayCollection|Page[]
+     * @var Page[]|ArrayCollection
      */
     protected $children;
-
-    public function __construct()
-    {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->children = new ArrayCollection();
-    }
 
     public function __toString()
     {
         return $this->title;
     }
 
-    /**
-     * @return int|string
-     */
-    abstract public function getId();
+    public function __construct()
+    {
+        $this->createdAt = new \DateTimeImmutable();
+        $this->children  = new ArrayCollection();
+    }
 
     public function getTitle(): string
     {
@@ -229,12 +290,12 @@ abstract class Page
         $this->enabled = (bool) $enabled;
     }
 
-    public function getParent(): ?self
+    public function getParent(): ?Page
     {
         return $this->parent;
     }
 
-    public function setParent(?self $parent): void
+    public function setParent(?Page $parent): void
     {
         if ($parent === $this) {
             // Refuse the category to have itself as parent.
@@ -252,14 +313,14 @@ abstract class Page
     }
 
     /**
-     * @return ArrayCollection|Page[]
+     * @return Page[]|ArrayCollection
      */
     public function getChildren()
     {
         return $this->children;
     }
 
-    public function addChild(self $page): void
+    public function addChild(Page $page): void
     {
         $this->children->add($page);
 
@@ -268,7 +329,7 @@ abstract class Page
         }
     }
 
-    public function removeChild(self $page): void
+    public function removeChild(Page $page): void
     {
         $this->children->removeElement($page);
     }
@@ -309,31 +370,34 @@ abstract class Page
 
         $current = $this;
         do {
-            $tree = $current->getSlug().$separator.$tree;
+            $tree    = $current->getSlug().$separator.$tree;
             $current = $current->getParent();
         } while ($current);
 
-        return \trim($tree, $separator);
+        return trim($tree, $separator);
     }
 
+    #[ORM\PrePersist]
+    #[ORM\PreUpdate]
     public function updateSlug(): void
     {
         if (!$this->slug) {
-            $this->slug = \mb_strtolower((new AsciiSlugger())->slug($this->title)->toString());
+            $this->slug = mb_strtolower((new AsciiSlugger())->slug($this->title)->toString());
         }
     }
 
-    public function onRemove(PreRemoveEventArgs $event): void
+    #[ORM\PreRemove]
+    public function onRemove(LifecycleEventArgs $event): void
     {
-        $em = $event->getObjectManager();
-        if (\count($this->children)) {
+        $em = $event->getEntityManager();
+        if (count($this->children)) {
             foreach ($this->children as $child) {
                 $child->setParent(null);
                 $em->persist($child);
             }
         }
         $this->enabled = false;
-        $this->parent = null;
+        $this->parent  = null;
         $this->title .= '-'.$this->getId().'-deleted';
         $this->slug .= '-'.$this->getId().'-deleted';
     }
