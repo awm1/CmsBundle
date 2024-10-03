@@ -13,19 +13,18 @@ namespace Orbitale\Bundle\CmsBundle\Tests\Fixtures\TestBundle\Entity;
 
 use Orbitale\Bundle\CmsBundle\Entity\Page as BasePage;
 use Doctrine\ORM\Mapping as ORM;
+use Orbitale\Bundle\CmsBundle\Repository\PageRepository;
 
-/**
- * @ORM\Entity(repositoryClass="Orbitale\Bundle\CmsBundle\Repository\PageRepository")
- * @ORM\Table(name="orbitale_cms_pages")
- */
+#[ORM\Table(name: 'orbitale_cms_pages')]
+#[ORM\Entity(repositoryClass: PageRepository::class)]
 class Page extends BasePage
 {
     /**
      * @var int
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
      */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     protected $id;
 
     /**
