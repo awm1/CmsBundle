@@ -38,7 +38,9 @@ class PageRepository extends AbstractCmsRepository
             ->setParameter('enabled', true)
         ;
 
-        return new Paginator($qb->getQuery()->useResultCache($this->cacheEnabled, $this->cacheTtl));
+        return new Paginator(
+            $qb->getQuery()->useQueryCache($this->cacheEnabled)->setQueryCacheLifetime($this->cacheTtl)
+        );
     }
 
     /**
@@ -108,7 +110,8 @@ class PageRepository extends AbstractCmsRepository
 
         /** @var Page[] $results */
         $results = $qb->getQuery()
-            ->useResultCache($this->cacheEnabled, $this->cacheTtl)
+            ->useQueryCache($this->cacheEnabled)
+            ->setQueryCacheLifetime($this->cacheTtl)
             ->getResult()
         ;
 

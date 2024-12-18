@@ -22,20 +22,8 @@ use Doctrine\ORM\Mapping\ClassMetadata;
  */
 class DoctrineMappingListener implements EventSubscriber
 {
-    /**
-     * @var string
-     */
-    private $pageClass;
-
-    /**
-     * @var string
-     */
-    private $categoryClass;
-
-    public function __construct(string $pageClass, string $categoryClass)
+    public function __construct(private string $pageClass, private string $categoryClass)
     {
-        $this->pageClass = $pageClass;
-        $this->categoryClass = $categoryClass;
     }
 
     public function getSubscribedEvents()

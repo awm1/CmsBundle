@@ -16,14 +16,8 @@ use Twig\Extension\GlobalsInterface;
 
 class CmsExtension extends AbstractExtension implements GlobalsInterface
 {
-    /**
-     * @var array
-     */
-    protected $designConfig;
-
-    public function __construct(array $designConfig)
+    public function __construct(protected array $designConfig)
     {
-        $this->designConfig = $designConfig;
     }
 
     public function getGlobals(): array

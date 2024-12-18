@@ -20,20 +20,8 @@ use Twig\Source;
 
 class LayoutsListener implements EventSubscriberInterface
 {
-    /**
-     * @var array
-     */
-    private $layouts;
-
-    /**
-     * @var Environment
-     */
-    private $twig;
-
-    public function __construct(array $layouts, Environment $twig)
+    public function __construct(private array $layouts, private Environment $twig)
     {
-        $this->layouts = $layouts;
-        $this->twig    = $twig;
     }
 
     /**

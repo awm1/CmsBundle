@@ -12,7 +12,7 @@
 namespace Orbitale\Bundle\CmsBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\Event\LifecycleEventArgs;
+use Doctrine\ORM\Event\PreRemoveEventArgs;
 use Doctrine\ORM\Mapping as ORM;
 use Orbitale\Bundle\CmsBundle\Repository\CategoryRepository;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -224,13 +224,10 @@ abstract class Category
         }
     }
 
-    /**
-     * @param LifecycleEventArgs $event
-     */
     #[ORM\PreRemove]
-    public function onRemove(LifecycleEventArgs $event): void
+    public function onRemove(PreRemoveEventArgs $event): void
     {
-        $em = $event->getEntityManager();
+        $em = $event->getObjectManager();
         if (count($this->children)) {
             foreach ($this->children as $child) {
                 $child->setParent(null);

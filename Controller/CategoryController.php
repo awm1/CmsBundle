@@ -18,13 +18,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CategoryController extends AbstractCmsController
 {
-    private $categoryRepository;
-    private $pageRepository;
-
-    public function __construct(CategoryRepository $categoryRepository, PageRepository $pageRepository)
-    {
-        $this->categoryRepository = $categoryRepository;
-        $this->pageRepository = $pageRepository;
+    public function __construct(
+        private CategoryRepository $categoryRepository,
+        private PageRepository $pageRepository
+    ) {
     }
 
     /**

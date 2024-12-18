@@ -32,7 +32,8 @@ class CategoryRepository extends AbstractCmsRepository
         /** @var Category[] $results */
         $results = $qb
             ->getQuery()
-            ->useResultCache($this->cacheEnabled, $this->cacheTtl)
+            ->useQueryCache($this->cacheEnabled)
+            ->setQueryCacheLifetime($this->cacheTtl)
             ->getResult()
         ;
 

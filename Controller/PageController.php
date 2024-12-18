@@ -23,11 +23,8 @@ class PageController extends AbstractCmsController
      */
     protected $request;
 
-    protected $pageRepository;
-
-    public function __construct(PageRepository $pageRepository)
+    public function __construct(protected PageRepository $pageRepository)
     {
-        $this->pageRepository = $pageRepository;
     }
 
     public function indexAction(Request $request, string $slugs = '', string $_locale = null): Response
